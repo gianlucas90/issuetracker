@@ -75,6 +75,8 @@ module.exports = function (app) {
 
         await Issue.find(filter, (err, arrayOfResults) => {
           if (!err && arrayOfResults) {
+            console.log(arrayOfResults);
+
             return res.json(arrayOfResults);
           }
         }).select('-project');
@@ -92,8 +94,8 @@ module.exports = function (app) {
           issue_title: req.body.issue_title,
           issue_text: req.body.issue_text,
           created_by: req.body.created_by,
-          assigned_to: req.body.assigned_to,
-          status_text: req.body.status_text,
+          assigned_to: req.body.assigned_to || '',
+          status_text: req.body.status_text || '',
           open: true,
           created_on: new Date().toUTCString(),
           updated_on: new Date().toUTCString(),
@@ -109,7 +111,8 @@ module.exports = function (app) {
 
         newIssue.save((err, savedIssue) => {
           if (!err && savedIssue) {
-            return res.json(savedIssue);
+            console.log(newIssue);
+            return res.json(newIssue);
           }
         });
         // res.status(201).json(doc);
