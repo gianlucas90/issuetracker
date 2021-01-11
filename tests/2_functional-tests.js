@@ -72,7 +72,7 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
-          assert.equal(res.body.error, 'Required field missing from request!');
+          assert.equal(res.body.error, 'required field(s) missing');
           done();
         });
     });
@@ -134,12 +134,8 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
+          assert.equal(res.body.result, 'successfully updated');
           assert.equal(res.body._id, id1);
-          assert.equal(res.body.issue_title, 'test title');
-          assert.equal(res.body.created_by, 'creator');
-          assert.equal(res.body.assigned_to, 'user assigned v2');
-          assert.equal(res.body.status_text, 'status text');
-
           done();
         });
     });
@@ -159,12 +155,8 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
+          assert.equal(res.body.result, 'successfully updated');
           assert.equal(res.body._id, id2);
-          assert.equal(res.body.issue_title, 'test title v2');
-          assert.equal(res.body.issue_text, 'test text v2');
-          assert.equal(res.body.created_by, 'creator v2');
-          assert.equal(res.body.assigned_to, 'user assigned v2');
-          assert.equal(res.body.status_text, 'status text v2');
 
           done();
         });
@@ -184,7 +176,7 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
-          assert.equal(res.body, 'no id supplied');
+          assert.equal(res.body.error, 'missing _id');
           done();
         });
     });
@@ -199,7 +191,8 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
-          assert.equal(res.body, 'no updated fields sent');
+          assert.equal(res.body.error, 'no update field(s) sent');
+          assert.equal(res.body._id, id2);
           done();
         });
     });
@@ -215,7 +208,8 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
-          assert.equal(res.body, 'could not update ' + invalidId);
+          assert.equal(res.body.error, 'could not update');
+          assert.equal(res.body._id, invalidId);
           done();
         });
     });
@@ -233,7 +227,8 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
-          assert.equal(res.body, 'deleted ' + id1);
+          assert.equal(res.body.result, 'successfully deleted');
+          assert.equal(res.body._id, id1);
           done();
         });
     });
@@ -248,7 +243,8 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
-          assert.equal(res.body, 'could not delete ' + invalidId);
+          assert.equal(res.body.error, 'could not delete');
+          assert.equal(res.body._id, invalidId);
           done();
         });
     });
@@ -261,7 +257,8 @@ suite('Functional Tests', function () {
 
         .end(function (err, res) {
           assert.equal(res.status, 200);
-          assert.equal(res.body, 'error, not found!');
+          assert.equal(res.body.error, 'missing _id');
+
           done();
         });
     });

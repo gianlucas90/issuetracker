@@ -35,7 +35,10 @@ const issueSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
-  updated_on: Date,
+  updated_on: {
+    type: Date,
+    default: Date.now(),
+  },
   created_by: {
     type: String,
     required: true,
@@ -60,8 +63,15 @@ module.exports = function (app) {
       try {
         let filter;
         if (req.params.project) filter = { project: req.params.project };
-        if (req.query.open) filter.open = req.query.open;
+        if (req.query._id) filter._id = req.query._id;
+        if (req.query.issue_title) filter.issue_title = req.query.issue_title;
+        if (req.query.issue_text) filter.issue_text = req.query.issue_text;
+        if (req.query.created_on) filter.created_on = req.query.created_on;
+        if (req.query.updated_on) filter.updated_on = req.query.updated_on;
+        if (req.query.created_by) filter.created_by = req.query.created_by;
         if (req.query.assigned_to) filter.assigned_to = req.query.assigned_to;
+        if (req.query.open) filter.open = req.query.open;
+        if (req.query.status_text) filter.status_text = req.query.status_text;
 
         await Issue.find(filter, (err, arrayOfResults) => {
           if (!err && arrayOfResults) {
@@ -86,7 +96,7 @@ module.exports = function (app) {
         } = req.body;
 
         if (!project || !issue_title || !issue_text || !created_by)
-          res.json({ error: 'Required field missing from request!' });
+          res.json({ error: 'required field(s) missing' });
 
         let newIssue = await new Issue({
           issue_title,
@@ -110,7 +120,7 @@ module.exports = function (app) {
 
     .put(async function (req, res) {
       try {
-        if (!req.body._id) return res.json('no id supplied');
+        if (!req.body._id) return res.json({ error: 'missing _id' });
 
         let updatedObject = {};
         Object.keys(req.body).forEach((key) => {
@@ -120,7 +130,10 @@ module.exports = function (app) {
         });
 
         if (Object.keys(updatedObject).length < 2)
-          return res.json('no updated fields sent');
+          return res.json({
+            error: 'no update field(s) sent',
+            _id: req.body._id,
+          });
 
         updatedObject.updated_on = new Date();
 
@@ -132,9 +145,12 @@ module.exports = function (app) {
           },
           (err, updatedIssue) => {
             if (!err && updatedIssue) {
-              return res.json(updatedIssue);
+              return res.json({
+                result: 'successfully updated',
+                _id: req.body._id,
+              });
             } else if (!updatedIssue)
-              return res.json('could not update ' + req.body._id);
+              return res.json({ error: 'could not update', _id: req.body._id });
           }
         );
       } catch (err) {
@@ -145,13 +161,13 @@ module.exports = function (app) {
     .delete(async function (req, res) {
       try {
         if (!req.body._id) {
-          return res.json('error, not found!');
+          return res.json({ error: 'missing _id' });
         }
         await Issue.findByIdAndDelete(req.body._id, (err, deletedIssue) => {
           if (!err && deletedIssue) {
-            res.json('deleted ' + deletedIssue._id);
+            res.json({ result: 'successfully deleted', _id: deletedIssue._id });
           } else if (!deletedIssue) {
-            res.json('could not delete ' + req.body._id);
+            res.json({ error: 'could not delete', _id: req.body._id });
           }
         });
       } catch (err) {
